@@ -86,7 +86,7 @@ def decoder(values):
     #- Initial Betas or coeffs, X design matrix, Y (prediction target) vector, number of epochs, size of minibatch (in case of standard), method (defines the method to use: 'stochastic' or 'standard', learning rate lr: define one in case the method is 'standard').
 #Outputs:
     #- Predicted Betas or coeffs.
-def SGD(B0, X, Y, epoch, batch_size=None, method=None, lr = None, penalty=None):
+def SGD(B0, X, Y, epoch, batch_size=None, method=None, lr = None, penalty=0.0):
     if method == 'stochastic':
         m = int(len(X)/batch_size)
         t0, t1 = 5, 50
@@ -96,7 +96,7 @@ def SGD(B0, X, Y, epoch, batch_size=None, method=None, lr = None, penalty=None):
                 ri = ra.sample(range(len(X)),batch_size)
                 Xi = X[ri]
                 Yi = Y[ri]
-                if penalty != None:
+                if penalty != 0.0:
                     G = Xi.T @ (Xi @ B0 - Yi) + (penalty * B0)
                 else:
                     G = Xi.T @ (Xi @ B0 - Yi)
@@ -118,7 +118,7 @@ def SGD(B0, X, Y, epoch, batch_size=None, method=None, lr = None, penalty=None):
 
 #Function for plotting trade-offs
 #Inputs:
-    #- MSE error for test and training, title of the figure, fig_name (optional variable if we want to save the image).
+    #- MSE error for test and training, values for the axis labels, title of the figure, y axis scale, fig_name (optional variable if we want to save the image).
 #Output:
     #- Figure show and Figure save in a file.
 def plot_trade(er_v, tr_v, x_values, y_label, x_label, title, yscale=None, xscale='None', fig_name=None):
@@ -138,7 +138,11 @@ def plot_trade(er_v, tr_v, x_values, y_label, x_label, title, yscale=None, xscal
     if fig_name != None:
         plt.savefig('figures/'+fig_name)
         
-        
+#Function for plotting heat maps
+#Inputs:
+    #- MSE error for test and training (matrices), title of the figure, x and y labels on axis, rotation option for x values in axis, heat map logarithmic scale option, fig_name (optional variable if we want to save the image).
+#Output:
+    #- Figure show and Figure save in a file.        
 def plot_heatmap(matrix, Title, X_label, Y_label, x_values, y_values, x_rot=False, log_scale=False, fig_name=None):
     largo, alto = 7, 7
     #plot for test set
@@ -159,55 +163,7 @@ def plot_heatmap(matrix, Title, X_label, Y_label, x_values, y_values, x_rot=Fals
     plt.title(Title, fontsize=20)
     if fig_name != None:
         plt.savefig('figures/'+fig_name)
+
+        
         
     
-#OLS WITH THE STOCHASTIC GRADIENT DESCENT method ().
-def OLS_var(degrees, epochs, learning, batch_size=None, var_type=None):
-    #degree = 20
-    #degrees = np.linspace(0,degree,degree+1)
-    #epochs = 50
-    #learning = np.logspace(-12,-3,10)
-    #learning = np.linspace(0.001,0.02,20)
-    mtr_MSE = []
-    mer_MSE = []
-    
-    if var_type == 'learning_rate':
-        target = learning
-    elif var_type == 'epochs':
-        target = epochs
-    elif var_type == 'batch_size':
-        target = batch_size
-    
-    for deg in degrees:
-        er1_MSE = []
-        tr1_MSE = []
-        for item in target:
-            Xm, Z = D_matrix(0.02, deg)
-            #random data_test split
-            X_train, X_test, Z_train, Z_test = train_test_split(Xm, Z, test_size=0.2)
-            B0 = np.random.random((len(Xm[0]),1))
-            #adding the confidence intervals
-            if var_type == 'learning_rate':
-                beta = SGD(B0, X_train, Z_train, epochs, method='stochastic', lr=item)
-            elif var_type == 'epochs':
-                beta = SGD(B0, X_train, Z_train, item, method='stochastic', lr=learning)
-            elif var_type == 'batch_size':
-                beta = SGD(B0, X_train, Z_train, epochs, method='stochastic', lr=learning)
-            #generating based on the model predictions with the train data set and the test dataset
-            Z_model = X_test @ beta
-            Ztr_model = X_train @ beta
-            #saving performance error
-            tr1_MSE.append(MSE(Z_train, Ztr_model))
-            er1_MSE.append(MSE(Z_test, Z_model))
-        mtr_MSE.append(tr1_MSE)
-        mer_MSE.append(er1_MSE)
-        
-    return mtr_MSE, mer_MSE
-    
-    #plot_heatmap(matrix=np.array(mtr_MSE), Title='SGD OSL - Learning Rate', X_label='Pol. Degree', Y_label='Learning rate', fig_name='SGD_OSL_lr_train.png')
-    #plt.yticks(np.arange(len(learning))+0.5, np.round((learning),2), rotation='horizontal')
-    #plt.savefig('figures/SGD_OSL_lr_train.png')
-    
-    #plot_heatmap(matrix=np.array(mer_MSE), Title='SGD OSL (learning rate variable)', X_label='Pol. Degree', Y_label='Learning rate', fig_name='SGD_OSL_lr_test.png')
-    #plt.yticks(np.arange(len(learning))+0.5, np.round((learning),2), rotation='horizontal')
-    #plt.savefig('figures/SGD_OSL_lr_test.png')

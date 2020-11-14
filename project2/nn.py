@@ -5,9 +5,10 @@ import math as m
 
 #Fully Connected Neural Network class for its initialization and further methods like the training and test. Time computation is quite surprisingly due to the matrix operations with relative smallamount of datasets compared to life example datasets for training (near 10'000).
 class NeuralNetwork:
+    
     #Function for initializing  the Weights ands Biases of each layer of the NN accoirding to the specified architecture.
     #Inputs:
-        #- input_size, number of hidden layers, number of neurons (list of numbers of neurons per each hidden layer), number of nodes for output.
+        #- input_size, number of hidden layers, number of neurons (list of numbers of neurons per each hidden layer), number of nodes for output, number of iterations, learning rate, activation function to use, penalty value (default is 0.0), parameter to define if softmax is to be used at the end or not (not recomenen for regression problems).
     #Output:
         #- the entire architecture with initialized weights and biases (type dictionary).
     def __init__(self, X_input, Y_input, num_nodes, num_outputs, epochs, lr, act_type='relu', penalty=0.0, prob=True):
@@ -115,9 +116,19 @@ class NeuralNetwork:
         x[x > 0] = 1
         return x
     
+    #Softmax function used in the last layer for targeting probabilities
+    #Inputs:
+		#- value x.
+	#Output:
+		#- function evaluated in that value x.
     def softmax(self, x):
         return np.exp(x)/np.sum(np.exp(x), axis=1, keepdims=True)
     
+    #Function for evaluationg which activation function to use according to the desired activation function initialized in the Neural Network
+    #Inputs:
+		#- value x.
+	#Output:
+		#- function evaluated in that value x..
     def activation(self, x):
         if self.act_type == 'relu':
             return self.ReLu(x)
@@ -127,7 +138,12 @@ class NeuralNetwork:
             return self.tanh(x)
         elif self.act_type == 'leaky_relu':
             return self.Leaky_ReLu(x)
-        
+    
+    #Function for evaluationg which derivate function to use according to the desired activation function initialized in the Neural Network
+    #Inputs:
+		#-  value x.
+	#Output:
+		#- function evaluated in that value x.
     def derivative(self, x):
         if self.act_type == 'relu':
             return self.dev_ReLu(x)
@@ -140,9 +156,9 @@ class NeuralNetwork:
         
     #Feed Forwards function
     #Input:
-        #- Initial parameters of weights, data set (Design MAtrix) and biases.
+        #- Initial parameters of weights, data set, biases and probability boolean to decide if Aoftmax is used or not.
     #Output:
-        #- Calculated probabilities A and Z values.
+        #- Calculated A and Z values for each hidden layer.
     def feed_forward(self, X, W, B, prob):
         iterations = len(W)
         Z = {}
@@ -164,9 +180,9 @@ class NeuralNetwork:
     
     #Back Propagation function
     #Input:
-        #- Initial parameters of weights, data set (Design MAtrix) and biases.
+        #- Initial parameters of weights, data set, biases, A and Z values of the hidden layers.
     #Output:
-        #- Gradients for Weights and Biases in each hidden layer.
+        #- Gradients for Weights and Biases in each hidden layer to use in the upgrade step.
     def back_propagation(self, X, Y, W, B, A, Z):
         layers = len(A)
         m = len(X)
@@ -189,9 +205,9 @@ class NeuralNetwork:
     
     #Parameters Upgrade function
     #Input:
-        #- Initial parameters of weights and biases, gradients for update, learning rate and penalty parameter (0 if there is no penalty).
+        #- Weights and biases, gradients for update, learning rate and penalty parameter (0.0 if there is no penalty).
     #Output:
-        #- Gradients for Weights and Biases in each hidden layer.
+        #- Updates Weights and Biases per hidden layer.
     def upgrade_parameters(self, dW, dB, W, B, lr, penalty):
         for i in range(len(dW)):
             if penalty != 0.0:
@@ -203,25 +219,80 @@ class NeuralNetwork:
     #Train function.
     #Do all the processes of feed_forward, back_propagation and upgrade_parameters for a certain amount of epochs until Weights and Biases are updated completely for this training set
     #Input:
-    #Output:    
+        #-
+    #Output:
+        #-
     def train(self):
         for i in range(self.epochs):
             #print(i)
             self.Z, self.A = self.feed_forward(self.X_input, self.W, self.B, self.prob)
             self.dW, self.dB = self.back_propagation(self.X_input, self.Y, self.W, self.B, self.A, self.Z)
             self.W, self.B = self.upgrade_parameters(self.dW, self.dB, self.W, self.B, self.lr, self.penalty)
-            #print(self.A['A4'])
             
     #Predict function.
     #Based on an already train NN, it predicts the classes or output of a test set passed as argument.
     #Input:
         #- Test_set in the same type as the Train set used to initialize the NN.
     #Output:
-        #- If it is a classification, it returns the position of the maximum probability achieved for each input of the test set. If it is a singular-value prediction, it returns the value predicted.    
+        #- Values predicted or probabilities per nodes. To use as it is for regression problems, or probability logits to be decoded with the decoder function in method.py    
     def predict(self, test_set):
         Zetas, As = self.feed_forward(test_set, self.W, self.B, self.prob)
         classes = As['A'+str(len(self.num_nodes)+1)]
         return classes
 
 
-
+#Logistic Regression class and further methods like the training and test.
+class Logistic_Regression:
+    
+    #Function for initializing the Parameters, including the initial coefficients from 0 to 1.
+    #Inputs:
+        #- input data, target values, number of iterations, learning rate, penalty value (default is 0.0), threshold for binary classification in probability distribution (default is 0.5).
+    #Output:
+        #- initialized values.
+    def __init__(self, X_input, Y_input, epochs, lr, penalty=0.0, threshold=0.5):
+        self.X = X_input
+        self.n_inputs, self.n_features = X_input.shape
+        self.Y = Y_input
+        self.lr = lr
+        self.B = np.random.rand(self.n_features,1)
+        self.penalty = penalty
+        self.epochs = int(epochs)
+        self.prob = threshold
+    
+    #Probability calculation function (Sigmoid function)
+    #Inputs:
+        #- values (array of values in column).
+    #Output:
+        #- evaluated values in sigmoid fucntion (array with size equal to the Input).
+    def probability(self, values):
+        return 1/(1 + np.exp(-values))
+    #Train function.
+    #Do all the processes of gradient descent, with a cost function defined on probabilty comparison. Penalty parametr also taked into accountto compute another gradient regularized in case that penalty is different from 0.0
+    #Input:
+        #-
+    #Output:
+        #-
+    def train(self):
+        t0, t1 = 5, 50
+        #print(self.B)
+        for i in range(self.epochs):
+            if self.penalty != 0.0:
+                G = self.X.T @ (self.Y - self.probability( self.X @ self.B )) + (self.penalty * self.B)
+            else:
+                G = self.X.T @ (self.Y - self.probability( self.X @ self.B ))
+            
+            self.B += self.lr * G
+    
+    #Predict function.
+    #Based on an already train Logistic Regression (updated coefficients).
+    #Input:
+        #- Test_set in the same type as the Train set used to initialize the class.
+    #Output:
+        #- Values predicted in the way of probabilities. It instantly translates to the desired class (0 or 1) (binary classification).   
+    def predict(self, values):
+        
+        results = self.probability( values @ self.B )
+        results[results < self.prob] = 0
+        results[results >= self.prob] = 1
+        return results
+    
