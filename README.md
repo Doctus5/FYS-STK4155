@@ -25,5 +25,5 @@ project 2 is a directory that cointais the necessary files for the Project 2.
     - matplotlib
     - seaborn
     - tensorflow
-  Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
+Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
   
