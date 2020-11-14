@@ -17,7 +17,8 @@ project 2 is a directory that cointais the necessary files for the Project 2.
   - Jupyter notebook "project2.ipynb" which runs all the studied features in this project. Is necessary of the Jupyter Notebook or Jupyter Lab to run it.
   - nn.py, a python script where Neural Network and Logistic Regression classes are located.
   - method.py, a python script that imports several useful functions as accuracy score and MSE calculations, plotting functions, Stochastic Gradient Descent methods, encoder and decoders of logist for Neural Networks, Design Matrix for Polynomial Regressions, and Franke Function data generation.
-  Necessary packages or Libraries. Before running, make sure you have the following packages:
+  
+Necessary packages or Libraries. Before running, make sure you have the following packages:
     - numpy
     - math
     - random
@@ -25,5 +26,6 @@ project 2 is a directory that cointais the necessary files for the Project 2.
     - matplotlib
     - seaborn
     - tensorflow
+    
 Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
   
