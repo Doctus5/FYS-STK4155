@@ -1,5 +1,5 @@
 # FYS-STK4155
-Repository for Applied Data Sciences and Machine Learning from course at UiO.
+Repository for Applied Data Sciences and Machine Learning.
 
 project1 is a directory that contains the necessary files for the Project 1.
 
