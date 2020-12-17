@@ -28,4 +28,23 @@ Necessary packages or Libraries. Before running, make sure you have the followin
     - tensorflow
     
 Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
+
+project3 is a directory that cointais the necessary files for the Project 2.
+
+  "project3" folder contains the following:
+  - Jupyter notebook "nn_on_glaciers.ipynb" which runs all the studied features in this project. Is necessary of the Jupyter Notebook or Jupyter Lab to run it.
+  - nn.py, a python script where Neural Network and U_Net classes are located.
+  - method.py, a python script that imports several useful functions for data augmentation on images and pre-processing of landsat satelite images.
+  
+Necessary packages or Libraries. Before running, make sure you have the following packages:
+    - numpy
+    - math
+    - random
+    - sklearn
+    - matplotlib
+    - seaborn
+    - tensorflow
+    - rasterio
+    
+Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
   
