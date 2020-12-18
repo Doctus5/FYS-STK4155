@@ -170,7 +170,13 @@ def plot_heatmap(matrix, Title, X_label, Y_label, x_values, y_values, x_rot=Fals
     if fig_name != None:
         plt.savefig('figures/'+fig_name)
 
-        
+#Central function for loading the images of the data directory and making pre-processing with data augmentation
+#Inputs:
+    #- name of the directories inside the data folder.
+    #- pixel number to devide the main images in square mini-images (batches).
+    #- number for stacking the bands into a single image (default is 0 but mainly 2 is used because is the size of bands per pixel).
+#Output:
+    #- The complete dataset to use and their respective binary image solution.       
 def data_load(dirs, pix_division, stack_axis=0):
     
     Y = []
@@ -193,7 +199,12 @@ def data_load(dirs, pix_division, stack_axis=0):
         
         
 
-
+#Pre-processing function. Compute the bands to use in a sort of RGB normal image (samep position).
+#Inputs:
+    #- name of the individual directory to read.
+    #- number for stacking the bands into a single image (default is 0 but mainly 2 is used because is the size of bands per pixel).
+#Output:
+    #- The image 3-band with each one being a computed band from the original bands available in the sub directory data folder. 
 def pre_processing(directory, stack_axis=0):
     path = [directory+'/'+d for d in os.listdir(directory) if not d.endswith('Rast.tif') and d.endswith('.tif')]
     path = np.sort(path)
@@ -210,12 +221,14 @@ def pre_processing(directory, stack_axis=0):
     B1 -= B1.min()
     B1 /= B1.max() 
     #calculating snow index and normalizing above 0
-    B2 = (im[:,:,1] - im[:,:,4]) / (im[:,:,1] + im[:,:,4])
+    #B2 = (im[:,:,1] - im[:,:,4]) / (im[:,:,1] + im[:,:,4])
+    B2 = im[:,:,4] / im[:,:,3]
     B2 -= B2.min()
     B2 /= B2.max()
     #calculating water index and normalizing above cero
     #B3 = 0.2125*im[:,:,5] + 0.7154*im[:,:,1] + 0.0721*im[:,:,0]
     B3 = (im[:,:,1] - im[:,:,2]) / (im[:,:,1] + im[:,:,2])
+    #B3 = im[:,:,4]
     B3 -= B3.min()
     B3 /= B3.max()
     
@@ -223,6 +236,13 @@ def pre_processing(directory, stack_axis=0):
     
     return im
 
+#Data agumentation functino to create more synthetical data from reflection and rotation of each by 90 degrees.
+#Inputs:
+    #- name of the sub directory inside the data folder.
+    #- pixel number to devide the main images in square mini-images (batches).
+    #- solution image to do the same data augmentation process so all the synthetic dataset produced matches with also affected solutions based on the same procedures.
+#Output:
+    #- A collection fo new and more datasets, icnluding the original mini-images and their synthetic produced ones based ont heir originals.  
 def data_augmentation(data, target, pix_num):
     #Remember, data is multiband, and target is only a matrix
     #cut_data
@@ -263,7 +283,12 @@ def data_augmentation(data, target, pix_num):
     
     return new_data, new_targets
 
-
+#Splitting the image function to create a collection of several images of the same one (similar to inside functions of the data augmentation).
+#Inputs:
+    #- individual image to segment, normally made for the targets or predicted outputs.
+#Output:
+    #- an array that contaisn the segmented parts of the original image.
+    #- dimensions of the original image before segmentation so data_unit can make the reverse process.
 def data_split(data, pix_num):
     #Remember, data is multiband, and target is only a matrix
     #cut_data
@@ -278,6 +303,12 @@ def data_split(data, pix_num):
     
     return np.array(new_data), [height, width, channels]
 
+#A contrary function to the data_split in order to unify the pieces given from data_split and to reconstruct the original image.
+#Inputs:
+    #- array of segmented images that are part of the orignal.
+    #- the original shape of the segmented image before.
+#Output:
+    #- the original image reconstructed.
 def data_unit(data, original_size):
     #Remember, data is multiband, and target is only a matrix
     #cut_data
@@ -295,7 +326,15 @@ def data_unit(data, original_size):
     
     return np.array(new_data)
 
-
+#functino for shuffling the dataset several times and splitting it into Train and Test datasets based on a given ratio.
+#Inputs:
+    #- Input datasets after all the pre-processing.
+    #- Solution or target corresponding to the input datasets after all the pre-processing.
+    #- Shuffle desition (default is True).
+    #- Ratio of the dataset to be used as test.
+    #- The type model that this data is prepared for. If "unet", then it gives all in terms of mini-images. If "nn", then gives it all reshaped as list of the pixel values in each band.
+#Output:
+    #- The dataset (for train and test sets) splitted (both the inputs and targets/outputs/solutions).
 def train_test_split(X, Y, shuffle=True, test_perc = 0.2, type_is='unet'):
     print('Preparing Train and Test splitting...')
     #returns X_train, Y_train, X_test, Y_test

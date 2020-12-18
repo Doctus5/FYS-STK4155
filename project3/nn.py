@@ -369,7 +369,7 @@ class U_Net:
         self.conv5 = keras.layers.Conv2D(feat4, (3,3), activation=self.act_type, kernel_initializer='he_normal', padding='same')(self.conv5)
         
         
-        #Up fo the U-Net Part
+        #Up fo the U-Net Part and start concatenatting (By this we realized we could have done all thise shortly with a Sequential() function and a loop, but okay, seems more understandable and give us more control).
         
         #Sixth layer
         self.up4 = keras.layers.Conv2DTranspose(feat4, (2,2), strides=(2,2), padding='same')(self.conv5)
@@ -403,7 +403,8 @@ class U_Net:
         self.output = keras.layers.Conv2D(1, (1,1), activation=self.out_act_type)(self.upconv1)
         
         self.model = keras.Model(inputs=[self.inputs], outputs=[self.output])
-        #the model that contains the backpropagation algorithms.
+        
+        #the model that contains the backpropagation algorithms. We define here two different optimizers.
         if self.learning_rate is not None:
             sgd = keras.optimizers.SGD(lr=self.learning_rate)
         else:
@@ -414,7 +415,7 @@ class U_Net:
         return self.model.summary()
     
     def train(self, verbose_opt):
-        #We are going to minotr by setting a threshold that if the iterations score are not changing, meaning that the model could have reach  the optimu, then it stopps the iterations.
+        #We are going to mintor by setting a threshold that if the iterations score are not changing, meaning that the model could have reach  the optimu, then it stopps the iterations.
         call = keras.callbacks.EarlyStopping(patience=15, monitor='accuracy') 
         return self.model.fit(self.X_input, self.Y_input, epochs=self.epochs, validation_split=0.1, batch_size=self.batch_size, shuffle=True, callbacks=[call], verbose=verbose_opt)
         
@@ -422,5 +423,6 @@ class U_Net:
     def checkpoint(self):
         self.checkpoint = keras.callbacks.ModelCheckpoint('model.h5', verbose=1, save_best_only=True)
         
+    #makes the prediciton once the model is trained. WARNING: image dataset to predict must be in the same shape (height x width) as the dataset used for training.
     def predict(self, X_predict):
         return self.model.predict(X_predict) #verbose=1
