@@ -1,6 +1,8 @@
 # FYS-STK4155
 Repository for Applied Data Sciences and Machine Learning.
 
+PROJECT 1:
+
 project1 is a directory that contains the necessary files for the Project 1.
 
   "project1" folder contains the python notebook project_1.ipynb for the Franke Function implementation and regression tests.
@@ -10,6 +12,8 @@ project1 is a directory that contains the necessary files for the Project 1.
   To execute the python notebooks, please make use of jupyter lab, jupyter notebook or ipython notebook with support for Python version 3.6 or higher.
 
   Necessary packages: pandas, numpy, matplotlib, mpl_toolkits, math, scipy, imageio, time, seaborn and sklearn
+  
+PROJECT 2:
 
 project 2 is a directory that cointais the necessary files for the Project 2.
 
@@ -28,6 +32,8 @@ Necessary packages or Libraries. Before running, make sure you have the followin
     - tensorflow
     
 Packages can be installed using the comand "pip install #name_of_the_package#" or "conda install #name_of_the_package#" in case you are using a conda environment.
+
+PROJECT 3:
 
 project3 is a directory that contains the necessary files for the Project 3.
 
